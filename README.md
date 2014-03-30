@@ -3,7 +3,7 @@ openvswitch
 
 UPDATE: Works now with OpenWrt "Barrier Breaker" (Bleeding Edge)
 
-Open vSwitch 1.9.0 (OvS) package for OpenWrt
+Open vSwitch 2.1.0 (OvS) package for OpenWrt
 
 Installation
 ------------
@@ -12,23 +12,26 @@ Install this as a feed!
 
 ### Installation in OpenWrt
 
-> cd $TOPDIR
-> 
-> echo 'src-git openvswitch git://github.com/schuza/openvswitch.git' >> feeds.conf
->
-> ./scripts/feeds update openvswitch
->
-> ./scripts/feeds install -a -p openvswitch
-> 
-> make menuconfig
->
-> select Network -> openvswitch-switch, openvswitch-brcompat and openvswitch-controller
->
-> echo '# CONFIG_KERNEL_BRIDGE is not set' >> .config
+$ cd $TOPDIR
+ 
+$ echo 'src-git openvswitch git://github.com/ttsubo/openvswitch.git' >> feeds.conf
 
+$ ./scripts/feeds update openvswitch
 
+$ ./scripts/feeds install -a -p openvswitch
 
-Development
------------
+$ make menuconfig
 
-Please fork on githup and send pull requests.
+CONFIG_PACKAGE_kmod-crypto-crc32c=y  
+CONFIG_PACKAGE_kmod-lib-crc32c=y  
+CONFIG_PACKAGE_kmod-openvswitch=m  
+CONFIG_PACKAGE_openvswitch-common=m  
+CONFIG_PACKAGE_openvswitch-switch=m  
+
+Edit .config
+Comment Out "CONFIG_USE_MIPS16=y"
+
+Edit package/libs/toolchain/Makefile
+(http://patchwork.openwrt.org/patch/5019/)
+
+$ make V=s

@@ -13,8 +13,9 @@ start() {
 	}
 
 	$DEBUG start-stop-daemon -q -S -x  /usr/sbin/ovsdb-server -- \
-		--remote=punix:/var/run/db.sock --remote=db:Open_vSwitch,manager_options \
-		--pidfile=/var/run/ovsdb-server.pid --detach
+		--remote=punix:/var/run/db.sock \
+		--pidfile=/var/run/ovsdb-server.pid --detach \
+		--remote=db:Open_vSwitch,Open_vSwitch,manager_options
 	sleep 1
 
 	$DEBUG ovs-vsctl --no-wait init
@@ -22,14 +23,11 @@ start() {
 
 	$DEBUG start-stop-daemon -q -S -x  /usr/sbin/ovs-vswitchd -- \
 		--pidfile=/var/run/ovs-vswitchd.pid --detach
-	$DEBUG start-stop-daemon -q -S -x  /usr/sbin/ovs-brcompatd -- \
-		--pidfile=/var/run/ovs-brcompatd.pid --detach
 }
 
 stop() {
 	$DEBUG start-stop-daemon -q -K -p /var/run/ovsdb-server.pid
 	$DEBUG start-stop-daemon -q -K -p /var/run/ovs-vswitchd.pid
-	$DEBUG start-stop-daemon -q -S -p /var/run/ovs-brcompatd.pid
 }
 
 restart() {

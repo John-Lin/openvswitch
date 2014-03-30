@@ -11,7 +11,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openvswitch
 
 PKG_RELEASE:=1
-PKG_VERSION:=1.9.0
+PKG_VERSION:=2.1.0
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://openvswitch.org/releases/
@@ -54,8 +54,7 @@ define Package/openvswitch-common
 endef
 
 define Package/openvswitch-common/description
-  openvswitch-common provides components required by both openvswitch-switch and
-  openvswitch-controller.
+  openvswitch-common provides components required by openvswitch-switch.
 endef
 
 define Package/openvswitch-ipsec
@@ -69,17 +68,6 @@ define Package/openvswitch-ipsec/description
   IPsec.
 endef
 
-define Package/openvswitch-controller
-  $(call Package/openvswitch/Default)
-  TITLE:=Open Flow Switch Userspace Package
-  DEPENDS:=+openvswitch-common
-endef
-
-define Package/openvswitch-controller/description
-  The Open vSwitch controller enables OpenFlow switches that connect to it to
-  act as MAC-learning Ethernet switches.
-endef
-
 define Package/openvswitch-switch
   $(call Package/openvswitch/Default)
   TITLE:=Open Flow Switch Userspace Package
@@ -91,30 +79,16 @@ define Package/openvswitch-switch/description
   Open vSwitch kernel-based switch.
 endef
 
-define Package/openvswitch-brcompat
-  $(call Package/openvswitch/Default)
-  TITLE:=Open Flow Switch Userspace Package
-  DEPENDS:=+openvswitch-common
-endef
-
-define Package/openvswitch-brcompat/description
-  openvswitch-brcompat provides a way for applications that use the Linux bridge
-  to gradually migrate to Open vSwitch. Programs that ordinarily control the
-  Linux bridge module, such as "brctl", instead control the Open vSwitch
-  kernel-based switch.
-endef
-
 define KernelPackage/openvswitch
   SECTION:=kernel
   CATEGORY:=Kernel modules
   SUBMENU:=Network Support
   TITLE:=Open Flow Data Path Drivers
   KCONFIG:=CONFIG_BRIDGE
-  DEPENDS:=+kmod-stp +kmod-ipv6
+  DEPENDS:=+kmod-stp +kmod-ipv6 +kmod-gre +kmod-lib-crc32c
   FILES:= \
-	$(PKG_BUILD_DIR)/datapath/linux/brcompat.$(LINUX_KMOD_SUFFIX) \
 	$(PKG_BUILD_DIR)/datapath/linux/openvswitch.$(LINUX_KMOD_SUFFIX)
-  AUTOLOAD:=$(call AutoLoad,21,openvswitch brcompat)
+  AUTOLOAD:=$(call AutoLoad,21,openvswitch)
 endef
 
 define KernelPackage/openvswitch/description
@@ -159,7 +133,6 @@ define Package/openvswitch-common/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utilities/ovs-appctl $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utilities/ovs-benchmark $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utilities/ovs-ofctl $(1)/usr/bin/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utilities/ovs-parse-leaks $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utilities/ovs-pki $(1)/usr/bin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/ovsdb/ovsdb-client $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/sbin/
@@ -193,15 +166,8 @@ define Package/openvswitch-switch/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/vswitchd/vswitch.ovsschema $(1)/usr/share/openvswitch/
 endef
 
-define Package/openvswitch-brcompat/install
-	$(INSTALL_DIR) $(1)/usr/sbin/
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/vswitchd/ovs-brcompatd $(1)/usr/sbin/
-endef
-
 $(eval $(call BuildPackage,openvswitch-ipsec))
 $(eval $(call BuildPackage,openvswitch-common))
-$(eval $(call BuildPackage,openvswitch-controller))
 $(eval $(call BuildPackage,openvswitch-switch))
-$(eval $(call BuildPackage,openvswitch-brcompat))
 $(eval $(call KernelPackage,openvswitch))
 
